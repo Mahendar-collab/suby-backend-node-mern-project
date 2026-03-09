@@ -1,34 +1,48 @@
 const express = require("express");
-const dotEnv = require('dotenv');
-const mongoose = require('mongoose');
-const vendorRoutes = require('./routes/vendorRoutes');
-const bodyParser = require('body-parser');
-const firmRoutes = require('./routes/firmRoutes');
-const productRoutes = require('./routes/productRoutes');
-const cors = require('cors');
-const path = require('path')
+const dotenv = require("dotenv");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
 
-const app = express()
+// Import routes
+const vendorRoutes = require("./routes/vendorRoutes");
+const firmRoutes = require("./routes/firmRoutes");
+const productRoutes = require("./routes/productRoutes");
 
+// Load environment variables
+dotenv.config();
+
+const app = express();
 const PORT = process.env.PORT || 4000;
 
-dotEnv.config();
-app.use(cors())
+// Middlewares
+app.use(cors());
+app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB connected successfully!"))
-    .catch((error) => console.log(error))
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully!");
+  })
+  .catch((error) => {
+    console.log("MongoDB connection error:", error);
+  });
 
-app.use(bodyParser.json());
-app.use('/vendor', vendorRoutes);
-app.use('/firm', firmRoutes)
-app.use('/product', productRoutes);
-app.use('/uploads', express.static('uploads'));
+// Static folder for uploaded images
+app.use("/uploads", express.static("uploads"));
 
-app.listen(PORT, () => {
-    console.log(`server started and running at ${PORT}`);
+// Routes
+app.use("/vendor", vendorRoutes);
+app.use("/firm", firmRoutes);
+app.use("/product", productRoutes);
+
+// Test Route
+app.get("/", (req, res) => {
+  res.send("<h1>Welcome to SUBY Backend API</h1>");
 });
 
-app.use('/', (req, res) => {
-    res.send("<h1> Welcome to SUBY");
-})
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server started and running at ${PORT}`);
+});
